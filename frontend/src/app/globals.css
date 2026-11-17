@@ -1,0 +1,58 @@
+@import "tailwindcss";
+
+/* Warm sand palette. Every color is a token so dark mode only swaps values. */
+:root {
+  --sand-50: #fbf6ee;
+  --sand-100: #f5ecdd;
+  --sand-200: #ead9bf;
+  --card: #fffaf3;
+  --ink: #3a2a1f;
+  --ink-soft: #7d6552;
+  --accent: #c2562b;
+  --accent-hover: #a8461f;
+  --accent-soft: #f7dccb;
+  --line: #e6d4ba;
+  --danger: #b42318;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --sand-50: #1c1611;
+    --sand-100: #241c15;
+    --sand-200: #33281e;
+    --card: #2a2119;
+    --ink: #f4e8d8;
+    --ink-soft: #bfa78f;
+    --accent: #e3804f;
+    --accent-hover: #ee9566;
+    --accent-soft: #4a2e1f;
+    --line: #3d3025;
+    --danger: #f08a7e;
+  }
+}
+
+@theme inline {
+  --color-sand-50: var(--sand-50);
+  --color-sand-100: var(--sand-100);
+  --color-sand-200: var(--sand-200);
+  --color-card: var(--card);
+  --color-ink: var(--ink);
+  --color-ink-soft: var(--ink-soft);
+  --color-accent: var(--accent);
+  --color-accent-hover: var(--accent-hover);
+  --color-accent-soft: var(--accent-soft);
+  --color-line: var(--line);
+  --color-danger: var(--danger);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+  --font-display: var(--font-fraunces);
+}
+
+body {
+  background:
+    radial-gradient(1200px 600px at 10% -10%, var(--accent-soft), transparent 60%),
+    radial-gradient(900px 500px at 110% 10%, var(--sand-200), transparent 60%),
+    var(--sand-50);
+  color: var(--ink);
+  font-family: var(--font-sans), system-ui, sans-serif;
+}

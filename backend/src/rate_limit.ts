@@ -12,14 +12,18 @@ export async function rateLimit(req:Request,res:Response,next:NextFunction){
     const count=await redis.incr(key);
     if(count===1){
       await redis.expire(key,WINDOW_SECONDS)
-      res.set("X-RateLimit-Limit",String(LIMIT));
-      res.set("X-RateLimit-Remaining",String(Math.max(0,LIMIT-count)));
-      if(count>LIMIT){
-        res.set("Retry-After",String(WINDOW_SECONDS-(now%WINDOW_SECONDS)));
-        res.status(429).json({
-          error:"Too many links ,slow down bitch "
-        })
-      }
     }
+    res.set("X-RateLimit-Limit",String(LIMIT));
+    res.set("X-RateLimit-Remaining",String(Math.max(0,LIMIT-count)));
+    if(count>LIMIT){
+      res.set("Retry-After",String(WINDOW_SECONDS-(now%WINDOW_SECONDS)));
+      res.status(429).json({
+        error:"Too many links, slow down and try again in a minute"
+      })
+      return;
+    }
+  }catch{
+    // Redis is down: fail open (let the request through)
   }
+  next();
 }

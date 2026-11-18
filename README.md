@@ -9,7 +9,7 @@ GET  /aB3x9    →  redirects to the long URL
 
 ## Roadmap
 
-**Progress: 4 / 11** `████░░░░░░░` — ✅ done · 🚧 in progress · ⬜ not started
+**Progress: 5 / 11** `█████░░░░░░` — ✅ done · 🚧 in progress · ⬜ not started
 
 Think of the app as a **coat check**: you hand in a long link (the coat), get a short code (the ticket), and the ticket gets you the coat back.
 
@@ -19,8 +19,8 @@ Think of the app as a **coat check**: you hand in a long link (the coat), get a 
 | 2 | ✅ | Swap the object for Postgres (Prisma, one `Link` table) | Data survives restarts | A filing cabinet | Restart the server and the link still works |
 | 3 | ✅ | Docker Compose (app + Postgres) | Containers | The whole shop packed in boxes | `docker compose up` runs everything |
 | 4 | ✅ | Redis cache for `GET /:code` | Cache-aside | Sticky notes on the desk | The second open of a link doesn't touch Postgres |
-| 5 | 🚧 | Rate limit on `/shorten`, stored in Redis | Shared limits | A bouncer | The 11th request in a minute gets 429 |
-| 6 | ⬜ | 2 copies of the app + nginx | Horizontal scaling | More workers + a receptionist | Responses show different instance names |
+| 5 | ✅ | Rate limit on `/shorten`, stored in Redis | Shared limits | A bouncer | The 11th request in a minute gets 429 |
+| 6 | 🚧 | 2 copies of the app + nginx | Horizontal scaling | More workers + a receptionist | Responses show different instance names; rate limit sees each user's real IP |
 | 7 | ⬜ | Count clicks with a queue + worker | Background jobs | A slip box emptied by a helper | Clicks reach the DB a moment later, redirects stay fast |
 | 8 | ⬜ | `/health` + graceful shutdown | Production basics | "You okay?" + finish the customer before leaving | `docker compose stop` exits cleanly |
 | 9 | ⬜ | `/metrics` + Prometheus + Grafana | Observability | A scoreboard on the wall | Requests/sec on a graph |
@@ -28,6 +28,10 @@ Think of the app as a **coat check**: you hand in a long link (the coat), get a 
 | 11 | ⬜ | Kubernetes | Desired state | A manager who rehires anyone who quits | Kill a pod, it comes back |
 
 > **The big secret:** workers must remember nothing themselves (*stateless*). Steps 2, 4 and 5 move every bit of memory out of the app, so step 6 can just add more copies.
+
+### Known issues (to fix in step 6)
+- **Rate limit can't see real user IPs.** Next.js rewrites don't send `X-Forwarded-For`, so every request looks like it comes from Docker's network (`172.x.x.x`) and all users share one counter. nginx will set the header and route API traffic straight to the api.
+- **Port 4000 is open to anyone**, and the api trusts `X-Forwarded-For` (`trust proxy`), so a direct caller can fake their IP to dodge the limit. In step 6 only nginx gets a public port.
 
 ## Run
 

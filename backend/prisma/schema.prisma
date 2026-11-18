@@ -11,5 +11,6 @@ model Link {
   id        BigInt   @id @default(autoincrement())
   code      String   @unique @db.VarChar(16)
   url       String
+  clicks     Int      @default(0)
   createdAt DateTime @default(now())
 }

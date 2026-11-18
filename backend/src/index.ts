@@ -5,6 +5,7 @@ import { prisma } from "./db.js";
 import { Prisma } from "./generated/prisma/client.js";
 import { redis } from "./cache.js";
 import { rateLimit } from "./rate_limit.js";
+import { clickQueue } from "./queue.js";
 
 const app = express();
 // One proxy (Next.js now, nginx later) sits in front of us: trust its
@@ -89,9 +90,22 @@ app.get("/:code",async (req,res)=>{
   }
   redis.set(key,link.url,"EX",3600).catch(()=>{});
   res.set("X-Cache","MISS")
+  clickQueue.add("click",{code}).catch(()=>{})
   res.redirect(302,link.url);
 })
-
+app.get("/stats/:code",async (req,res)=>{
+  const link=await prisma.link.findUnique({
+    where:{code:req.params.code},
+    select: {code:true,url:true,clicks:true,createdAt:true}
+  })
+  if(!link){
+    res.status(404).json({
+      error:"Link not found"
+    })
+    return;
+  }
+  res.json(link);
+})
 app.listen(PORT, () => {
   console.log(`Listening on http://localhost:${PORT}`);
 });

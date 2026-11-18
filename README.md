@@ -9,7 +9,7 @@ GET  /aB3x9    →  redirects to the long URL
 
 ## Roadmap
 
-**Progress: 3 / 11** `███░░░░░░░░` — ✅ done · 🚧 in progress · ⬜ not started
+**Progress: 4 / 11** `████░░░░░░░` — ✅ done · 🚧 in progress · ⬜ not started
 
 Think of the app as a **coat check**: you hand in a long link (the coat), get a short code (the ticket), and the ticket gets you the coat back.
 
@@ -18,8 +18,8 @@ Think of the app as a **coat check**: you hand in a long link (the coat), get a 
 | 1 | ✅ | Express + TypeScript, `POST /shorten`, `GET /:code`, data in a JS object, Next.js frontend | The basic API | One worker remembering tickets in his head | You can shorten a link and open it in the browser |
 | 2 | ✅ | Swap the object for Postgres (Prisma, one `Link` table) | Data survives restarts | A filing cabinet | Restart the server and the link still works |
 | 3 | ✅ | Docker Compose (app + Postgres) | Containers | The whole shop packed in boxes | `docker compose up` runs everything |
-| 4 | 🚧 | Redis cache for `GET /:code` | Cache-aside | Sticky notes on the desk | The second open of a link doesn't touch Postgres |
-| 5 | ⬜ | Rate limit on `/shorten`, stored in Redis | Shared limits | A bouncer | The 11th request in a minute gets 429 |
+| 4 | ✅ | Redis cache for `GET /:code` | Cache-aside | Sticky notes on the desk | The second open of a link doesn't touch Postgres |
+| 5 | 🚧 | Rate limit on `/shorten`, stored in Redis | Shared limits | A bouncer | The 11th request in a minute gets 429 |
 | 6 | ⬜ | 2 copies of the app + nginx | Horizontal scaling | More workers + a receptionist | Responses show different instance names |
 | 7 | ⬜ | Count clicks with a queue + worker | Background jobs | A slip box emptied by a helper | Clicks reach the DB a moment later, redirects stay fast |
 | 8 | ⬜ | `/health` + graceful shutdown | Production basics | "You okay?" + finish the customer before leaving | `docker compose stop` exits cleanly |

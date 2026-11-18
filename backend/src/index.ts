@@ -1,8 +1,8 @@
 import express from "express";
 import { randomInt } from "node:crypto";
-import path from "node:path";
 import { prisma } from "./db.js";
 import { Prisma } from "./generated/prisma/client.js";
+import { redis } from "./cache.js";
 
 const app = express();
 const PORT = Number(process.env.PORT ?? 4000);
@@ -30,8 +30,6 @@ function isValidUrl(input: unknown): input is string {
 
 app.use(express.json({ limit: "10kb" }));
 
-app.use(express.static(path.join(import.meta.dirname, "../../frontend")));
-
 function isDuplicateCode(err: unknown): boolean {
   return err instanceof Prisma.PrismaClientKnownRequestError && err.code === "P2002";
 }
@@ -55,17 +53,29 @@ app.post("/shorten", async (req, res) => {
   res.status(500).json({ error: "Could not generate a unique code, try again" });
 });
 
-app.get("/:code", async (req, res) => {
-  const link = await prisma.link.findUnique({
-    where: { code: req.params.code },
-    select: { url: true },
-  });
-  if (!link) {
-    res.status(404).json({ error: "Link not found" });
+app.get("/:code",async (req,res)=>{
+  const code=req.params.code
+  const key=`link:${code}`;
+  const cached=await redis.get(key).catch(()=>null);
+  if(cached){
+    res.set("X-Cache","HIT");
+    res.redirect(302,cached);
     return;
   }
-  res.redirect(302, link.url);
-});
+  const link=await prisma.link.findUnique({
+    where:{code},
+    select:{url:true},
+  });
+  if(!link){
+    res.status(404).json({
+      error:"Link not found"
+    })
+    return;
+  }
+  redis.set(key,link.url,"EX",3600).catch(()=>{});
+  res.set("X-Cache","MISS")
+  res.redirect(302,link.url);
+})
 
 app.listen(PORT, () => {
   console.log(`Listening on http://localhost:${PORT}`);

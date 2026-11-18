@@ -17,6 +17,16 @@ services:
       timeout: 3s
       retries: 15
       start_period: 30s
+  redis:
+    image: redis:8-alpine
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli","ping"]
+      interval: 2s
+      timeout: 3s
+      retries: 1
 
   migrate:
     build:
@@ -32,12 +42,15 @@ services:
   api:
     build: ./backend
     restart: unless-stopped
+    container_name: backend
     environment:
       PORT: 4000
       DATABASE_URL: postgresql://url_shortner:url_shortner@postgres:5432/url_shortner
     ports:
       - "4000:4000"
     depends_on:
+      redis:
+        condition: service_healthy
       migrate:
         condition: service_completed_successfully
 

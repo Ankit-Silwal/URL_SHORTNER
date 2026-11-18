@@ -64,5 +64,17 @@ services:
     depends_on:
       - api
 
+  worker:
+    build: ./backend
+    restart: unless-stopped
+    command:  ["node","dist/worker.js"]
+    environment:
+      - DATABASE_URL= postgresql://url_shortner:url_shortner@postgres:5432/url_shortner
+      - REDIS_URL=  redis://redis:6379
+    depends_on:
+      redis:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
 volumes:
   postgres_data:

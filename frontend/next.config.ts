@@ -1,7 +1,7 @@
 import type { NextConfig } from "next";
 
 // Where the Express API runs. Override with BACKEND_URL in production.
-const BACKEND_URL = process.env.BACKEND_URL ?? "http://localhost:4000";
+const BACKEND_URL = process.env.BACKEND_URL ?? "http://localhost:8080";
 
 const nextConfig: NextConfig = {
   cacheComponents: true,

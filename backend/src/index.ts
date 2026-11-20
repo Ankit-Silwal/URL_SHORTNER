@@ -69,12 +69,33 @@ app.post("/shorten", rateLimit, async (req, res) => {
   res.status(500).json({ error: "Could not generate a unique code, try again" });
 });
 
+app.get("/health",(_req,res)=>{
+  res.json({
+    status:"ok"
+  })
+})
+
+app.get("/ready",async (_req,res)=>{
+  try{
+    await prisma.$queryRaw`Select 1`;
+    await redis.ping();
+    res.json({
+      status:"ready"
+    });
+  }catch{
+    res.status(503).json({
+      status:"Not ready"
+    })
+  }
+})
+
 app.get("/:code",async (req,res)=>{
   const code=req.params.code
   const key=`link:${code}`;
   const cached=await redis.get(key).catch(()=>null);
   if(cached){
     res.set("X-Cache","HIT");
+    clickQueue.add("click",{code}).catch(()=>{})
     res.redirect(302,cached);
     return;
   }
@@ -106,6 +127,24 @@ app.get("/stats/:code",async (req,res)=>{
   }
   res.json(link);
 })
-app.listen(PORT, () => {
+const server=app.listen(PORT, () => {
   console.log(`Listening on http://localhost:${PORT}`);
 });
+//Graceful shutdown thus it would complete the incoming request but reject the new ones
+function shutDown(signal:string){
+  console.log(`${signal} received,finishing requests....`);
+  //if we're stuck even after 10 s we give up and leave
+  setTimeout(()=>process.exit(1),10000);// no .unref() needed: process.exit(0) below ends the app anyway
+  server.close(async ()=>{         // server.close =>Stop the new ones wait for the current one
+    await clickQueue.close();       //close the slip box
+    await redis.quit();     // putt away the redis 
+    await prisma.$disconnect();   //close the database
+    console.log("Bye fucker");
+    process.exit(0);
+  })
+}
+
+process.on("SIGTERM",()=>shutDown("SIGTERM")); //Docker is asking like when we did docker compose down 
+process.on("SIGINT",()=>shutDown("SIGINT"));  //wer  pressed ctrl+c
+
+//shit like SIGKILL also exist which is ran after 10 sec 

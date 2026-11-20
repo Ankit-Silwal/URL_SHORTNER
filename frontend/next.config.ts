@@ -18,9 +18,9 @@ const nextConfig: NextConfig = {
     return {
       beforeFiles: [],
       // /api/shorten -> backend /shorten (browser talks to one origin, so no CORS).
-      afterFiles: [{ source: "/api/:path*", destination: `${BACKEND_URL}/:path*` }],
+      afterFiles: [{ source: "/api/:path*", destination: `${BACKEND_URL}/api/:path*` }],
       // Anything that isn't a page (e.g. /aB3x9k2) is a short code: let the backend redirect it.
-      fallback: [{ source: "/:code", destination: `${BACKEND_URL}/:code` }],
+      fallback: [{ source: "/:code([0-9A-Za-z]{7})", destination: `${BACKEND_URL}/:code` }],
     };
   },
 };

@@ -1,0 +1,9 @@
+global:
+  scrape_interval: 5s    # check the metrics every 5sec
+
+scrape_configs:
+  - job_name: api
+    dns_sd_configs:
+      - names: ["api"]  #checking the copies of the api from the docker
+        type: A
+        port: 4000

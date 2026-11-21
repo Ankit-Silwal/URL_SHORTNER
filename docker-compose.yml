@@ -82,5 +82,23 @@ services:
         condition: service_healthy
       migrate:
         condition: service_completed_successfully
+  prometheus:
+    image: prom/prometheus:v3.5.0
+    restart: unless-stopped
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    depends_on:
+      - api
+  grafana:
+    image: grafana/grafana:12.1.0
+    restart: unless-stopped
+    ports:
+      - "3001:3000" 
+    volumes:
+      - grafana_data:/var/lib/grafana
+    depends_on:
+      - prometheus
 volumes:
   postgres_data:

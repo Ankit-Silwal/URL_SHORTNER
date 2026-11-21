@@ -6,6 +6,7 @@ import { Prisma } from "./generated/prisma/client.js";
 import { redis } from "./cache.js";
 import { rateLimit } from "./rate_limit.js";
 import { clickQueue } from "./queue.js";
+import { metrics,register } from "./metrics.js";
 
 const app = express();
 // One proxy (Next.js now, nginx later) sits in front of us: trust its
@@ -22,7 +23,7 @@ app.use((_req, res, next) => {
   res.set("X-Instance", INSTANCE);
   next();
 });
-
+app.use(metrics);
 const ALPHABET = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
 const CODE_LENGTH = 7;
 
@@ -89,6 +90,11 @@ app.get("/ready",async (_req,res)=>{
   }
 })
 
+
+app.get("/metrics",async (req,res)=>{
+  res.set("Content-Type",register.contentType);
+  res.end(await register.metrics());
+})
 app.get("/:code",async (req,res)=>{
   const code=req.params.code
   const key=`link:${code}`;

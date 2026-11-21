@@ -9,7 +9,7 @@ GET  /aB3x9    →  redirects to the long URL
 
 ## Roadmap
 
-**Progress: 7 / 11** `███████░░░░` — ✅ done · 🚧 in progress · ⬜ not started
+**Progress: 8 / 11** `████████░░░` — ✅ done · 🚧 in progress · ⬜ not started
 
 Think of the app as a **coat check**: you hand in a long link (the coat), get a short code (the ticket), and the ticket gets you the coat back.
 
@@ -22,8 +22,8 @@ Think of the app as a **coat check**: you hand in a long link (the coat), get a 
 | 5 | ✅ | Rate limit on `/shorten`, stored in Redis | Shared limits | A bouncer | The 11th request in a minute gets 429 |
 | 6 | ✅ | 2 copies of the app + nginx | Horizontal scaling | More workers + a receptionist | Responses show different instance names; rate limit sees each user's real IP |
 | 7 | ✅ | Count clicks with a queue + worker | Background jobs | A slip box emptied by a helper | Clicks reach the DB a moment later, redirects stay fast |
-| 8 | 🚧 | `/health` + graceful shutdown | Production basics | "You okay?" + finish the customer before leaving | `docker compose stop` exits cleanly |
-| 9 | ⬜ | `/metrics` + Prometheus + Grafana | Observability | A scoreboard on the wall | Requests/sec on a graph |
+| 8 | ✅ | `/health` + graceful shutdown | Production basics | "You okay?" + finish the customer before leaving | `docker compose stop` exits cleanly |
+| 9 | 🚧 | `/metrics` + Prometheus + Grafana | Observability | A scoreboard on the wall | Requests/sec on a graph |
 | 10 | ⬜ | Load test with k6 | Measuring | A fake crowd | You know the app's limit |
 | 11 | ⬜ | Kubernetes | Desired state | A manager who rehires anyone who quits | Kill a pod, it comes back |
 

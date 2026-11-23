@@ -91,7 +91,7 @@ app.get("/ready",async (_req,res)=>{
 })
 
 
-app.get("/metrics",async (req,res)=>{
+app.get("/metrics",async (_req,res)=>{
   res.set("Content-Type",register.contentType);
   res.end(await register.metrics());
 })
